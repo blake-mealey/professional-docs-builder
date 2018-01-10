@@ -1,0 +1,9 @@
+{
+	"engine": "pdflatex",
+	"repo-url": "https://raw.githubusercontent.com/blake-mealey/resume-data/master/",
+	"outdir": "output",
+	"pdfdir": "../PDFs",
+	"upload-machine": "blake@chimerical.ca",
+	"upload-path": "/home/blake/resume-site/public/files/Blake-Mealey-Resume.pdf",
+	"upload-file": "resume-web"
+}

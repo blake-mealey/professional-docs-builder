@@ -1,0 +1,6 @@
+secrets/
+.vscode/
+resume-parts/*
+output/*
+coverletter.tex
+cover-letters/*

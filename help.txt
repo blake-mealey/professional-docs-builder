@@ -1,0 +1,56 @@
+NAME
+    compile.py
+
+SYNOPSIS
+    compile.py --help
+    compile.py command0 [command1, ...] [options]
+
+DESCRIPTION
+    Handles the downloading of JSON data files from a private GitHub repo, the generation of .tex files
+    from the data files, the compilation of the resulting TeX document using LuaLaTeX, and the managing
+    and uploading of the resulting PDF documents. Every variable option defaults to the value of the
+    same key in config.json. For example, if the --engine option is not included, then the program will
+    use the 'engine' entry in the dictionary stored in config.json.
+
+COMMANDS
+    Commands are either a list of other commands, or a string which is executed on the command line.
+    Commands are are executed in the order they are passed.
+
+    High-level commands:
+
+        all             Runs: do-resume, do-cover-letters, copy
+        resume          Runs: do-resume, copy
+        web             Runs: do-web, copy
+        full            Runs: do-full, copy
+        cover-letters   Runs: do-coverletters, copy
+        copy            Copies all of the PDFs from the output directory to the PDFs directory
+                        (See --outdir and --pdfdir)
+        upload          Copies a PDF file from the PDFs directory using scp
+                        (See --pdfdir, --upload-machine, --upload-path and --upload-file)
+    
+    Low-level commands:
+
+        do-resume           Runs: do-web, do-full
+        do-web              Compiles the resume latex document with jobname 'resume-web'
+                            (See --quiet, --local, --existing, --outdir, --pdfdir)
+        do-full             Compiles the resume latex document with jobname 'resume-full'
+                            (See --quiet, --local, --existing, --outdir, --pdfdir)
+        do-cover-letters    TODO
+
+OPTIONS
+    Basic options (--option)
+
+        --help      Print this help text
+        --quiet     Don't print LuaLaTeX output
+        --local     Don't download latest data files before compiling
+        --existing  Don't generate .tex files from data files before compiling
+
+    Variable options (--option=value)
+
+        --engine            The LaTeX engine used to compile .tex files
+        --repo-url          The URL of the repo and branch containing the resume data files
+        --outdir            The output directory for LuaLaTeX
+        --pdfdir            The directory which PDFs will be copied to
+        --upload-machine    The user, password, and domain of the machine to upload to using scp
+        --upload-path       The path to copy to on the machine using scp
+        --upload-file       The file name (without .pdf extension) of the file to upload
