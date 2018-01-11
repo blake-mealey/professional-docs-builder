@@ -121,6 +121,14 @@ class TexFile:
             self.append('\\resitem{{{}}}'.format(item))
         return self.unindent().endItemize().unindent()
 
+    def resSubHeadingSmall(self, name, date, items):
+        self.append('\\item[]').indent()
+        self.append('\\ressubheadingsmall{{{}}}{{{}}}'.format(name, date))
+        self.append('\\begin{itemize}').indent()
+        for i, item in enumerate(items):
+            self.append('\\resitem{{{}}}'.format(item))
+        return self.unindent().endItemize().unindent()
+
     def nItemList(self, heading, items, singletonsOneLine=False):
         self.indent()
         if (len(items) == 1 and singletonsOneLine):
@@ -147,7 +155,7 @@ class TexFile:
 def genWebHeader():
     print('generating header_web.tex')
     web = TexFile('contact')
-    column1 = ['\\textbf{{\large {}}}'.format(web.data['name'])]
+    column1 = ['\\textbf{{\LARGE {}}}'.format(web.data['name'])]
     column2 = [web.data['email'],
         '\\href{{http://{0}}}{{{0}}}'.format(web.data['website']),
         '\\href{{https://www.linkedin.com/in/{0}}}{{\\linkedinsocialsymbol {0}}}'.format(web.data['linkedin']),
@@ -157,7 +165,7 @@ def genWebHeader():
 def genFullHeader():
     print('generating header_full.tex')
     full = TexFile('contact')
-    column1 = ['\\textbf{{\large {}}}'.format(full.data['name']),
+    column1 = ['\\textbf{{\LARGE {}}}'.format(full.data['name']),
         full.data['address'],
         full.data['city'] + ', ' + full.data['postal']]
     column2 = [full.data['phone'],
@@ -166,6 +174,12 @@ def genFullHeader():
         '\\href{{https://www.linkedin.com/in/{0}}}{{\\linkedinsocialsymbol {0}}}'.format(full.data['linkedin']),
         '\\href{{https://www.github.com/{0}}}{{\\githubsocialsymbol {0}}}'.format(full.data['github'])]
     full.header(column1, column2).save('header_full')
+
+def genFooter():
+    print('generating footer.tex')
+    footer = TexFile('contact')
+    footer.append('\\pagestyle{fancy}').append('\\fancyhf{}').append('\\rfoot{{{0}, Pg. \\thepage}}'.format(footer.data['name']))
+    footer.save('footer')
 
 def genExperience():
     print ('generating experience.tex file')
@@ -229,6 +243,13 @@ def genAchievements():
     achieve.nItemList('Academic', achieve.data['academic'], True)
     achieve.endDescription().save()
 
+def genCourses():
+    print('generating courses.tex file')
+    courses = TexFile('courses', 'Relevant Courses').beginItemizeLeftMargin()
+    for item in courses.data:
+        courses.resSubHeadingSmall(item['number'] + ' - ' + item['name'], item['date'], item['points'])
+    courses.endItemize().save()
+
 def genActivities():
     print ('generating activities.tex file')
     activities = TexFile('activities', 'Extracurricular Activities').beginDescription().indent()
@@ -241,10 +262,12 @@ def genActivities():
 def genLatex():
     genWebHeader()
     genFullHeader()
+    genFooter()
     genExperience()
     genEducation()
     genSkills()
     genAchievements()
+    genCourses()
     genActivities()
 
 hasCompiled = False
