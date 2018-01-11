@@ -1,6 +1,21 @@
+# Passwords and stuff
 secrets/
-.vscode/
+
+# Generated/loaded data
+data/*
 resume-parts/*
-output/*
+letter-parts/*
+
+# Contains private data rn
 coverletter.tex
 cover-letters/*
+
+# Output stuff
+output/*
+*.aux
+*.log
+*.out
+*.pdf
+
+# IDE Stuff
+.vscode/

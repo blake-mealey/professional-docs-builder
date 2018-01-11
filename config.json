@@ -1,5 +1,5 @@
 {
-	"engine": "pdflatex",
+	"engine": "xelatex",
 	"repo-url": "https://raw.githubusercontent.com/blake-mealey/resume-data/master/",
 	"outdir": "output",
 	"pdfdir": "../PDFs",

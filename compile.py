@@ -1,7 +1,7 @@
 #!/usr/bin/python3.6
 
 import re, base64, json, sys, types, subprocess
-from os import devnull
+from os import devnull, makedirs
 from urllib.request import Request, urlopen, urlretrieve
 
 def urlretrieve(urlfile, fpath):
@@ -9,8 +9,10 @@ def urlretrieve(urlfile, fpath):
     f.write(urlfile.read().decode())
     f.close()
 
-partsDir = './resume-parts/'
-dataDir = partsDir + 'data/'
+resumePartsDir = './resume-parts/'
+makedirs(resumePartsDir, exist_ok=True)
+dataDir = './data/'
+makedirs(dataDir, exist_ok=True)
 
 def loadDataFile(name, dir=dataDir):
     with open(dir + name + '.json', 'r') as file:
@@ -23,16 +25,19 @@ config = loadDataFile('config', './')
 # TODO: Replace with git submodule/ssh key
 githubUser = loadDataFile('githubUser', './secrets/')
 
-def getArgValue(argName):
+def getArgValue(argName, default=None):
     value = None
     argStart = '--' + argName + '='
     for arg in sys.argv:
         if (arg.startswith(argStart)):
             value = arg[len(argStart):]
     if (value == None):
-        value = config[argName]
-    if (value == None):
-        print ('No value found for setting \'{}\'. Check config.json to make sure a default exists, or supply one on the command line.'.format(argName))
+        try:
+            value = config[argName]
+        except KeyError:
+            value = default
+            if (value == None):     # TODO: Exit program?
+                print ('No value found for setting \'{}\'. Check config.json to make sure a default exists, or supply one on the command line.'.format(argName))
     return value
 
 repoUrl = getArgValue('repo-url')
@@ -76,7 +81,7 @@ class TexFile:
         fileName = (self.name if fileName == None else fileName)
         self.newLine()
         data = '\n'.join(self.lines)
-        with open(partsDir + fileName + '.tex', 'w') as file:
+        with open(resumePartsDir + fileName + '.tex', 'w') as file:
             file.write(data)
             file.close()
 
@@ -259,7 +264,7 @@ def genActivities():
 
     activities.unindent().endDescription().save()
 
-def genLatex():
+def genLatex():     # TODO: Inclusion based off of config file
     genWebHeader()
     genFullHeader()
     genFooter()
@@ -276,7 +281,7 @@ def beforeCompile():
     if (not hasCompiled):
         hasCompiled = True
         if '--local' not in sys.argv:
-            subprocess.call('rm {}/*.json'.format(dataDir), shell=True)
+            subprocess.call('rm {}*.json'.format(dataDir), shell=True)
             downloadFiles()
         if '--existing' not in sys.argv:
             genLatex()
@@ -320,6 +325,12 @@ else:
 
         outDir = getArgValue('outdir')
         pdfDir = getArgValue('pdfdir')
+        resumePdfDir = pdfDir + '/' + 'Resumes'
+        coverLetterPdfDir = pdfDir + '/' + 'CoverLetters'
+        makedirs(outDir, exist_ok=True)
+        makedirs(resumePdfDir, exist_ok=True)
+        makedirs(coverLetterPdfDir, exist_ok=True)
+
         compileLatex = '{} -shell-escape -output-directory={} -jobname={{}} {{}}.tex'.format(latexEngine, outDir)
         
         commands['all'] = ['do-resume', 'do-cover-letters', 'copy']
@@ -333,14 +344,14 @@ else:
         commands['full'] = ['do-full', 'copy']
         commands['do-full'] = compileLatex.format('resume-full', 'resume')
         
-        commands['cover-letters'] = ['do-cover-letters', 'copy']
-        commands['do-cover-letters'] = compileLatex.format('lockheed-martin-job', 'coverletter')
+        commands['cover-letter'] = ['do-cover-letter', 'copy']
+        commands['do-cover-letter'] = compileLatex.format(getArgValue('letter', ''), 'coverletter')
         
-        commands['copy'] = 'cp {}/*.pdf {}/'.format(outDir, pdfDir)
+        commands['copy'] = 'cp {}/*.pdf {}/'.format(outDir, resumePdfDir)
 
         uploadMachine = getArgValue('upload-machine')
         uploadPath = getArgValue('upload-path')
         uploadFile = getArgValue('upload-file')
-        commands['upload'] = 'scp {}/{}.pdf {}:{}'.format(pdfDir, uploadFile, uploadMachine, uploadPath)
+        commands['upload'] = 'scp {}/{}.pdf {}:{}'.format(resumePdfDir, uploadFile, uploadMachine, uploadPath)
 
         execCommand('my-command')
