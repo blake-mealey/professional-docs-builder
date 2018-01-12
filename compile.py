@@ -22,7 +22,6 @@ def loadDataFile(name, dir=dataDir):
 
 config = loadDataFile('config', './')
 
-# TODO: Replace with git submodule/ssh key
 githubUser = loadDataFile('githubUser', './secrets/')
 
 def getArgValue(argName, default=None):
